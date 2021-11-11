@@ -23,8 +23,17 @@ async function run() {
 
         const database = client.db('car_sales');
         const productsCollection = database.collection('products')
+        const orderCollection = database.collection('orders')
+        const reviewCollection = database.collection('review')
 
 
+        app.post('/products', async(req, res) => {
+            const item = req.body;
+            console.log('hit the post api', item);
+            const result = await productsCollection.insertOne(item);
+            console.log(result)
+            res.send (result)
+        })
         // get api 
         app.get('/products', async(req, res) => {
             const cursor = productsCollection.find({});
@@ -40,6 +49,54 @@ async function run() {
             const product = await productsCollection.findOne(query);
             res.json(product)
         })
+
+        // order post api 
+        app.post('/orders', async(req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.json(result)
+        })
+        // get review
+        app.post('/review', async(req, res) => {
+            const item = req.body;
+            console.log('hit the post api', item);
+            const result = await reviewCollection.insertOne(item);
+            console.log(result)
+            res.send (result)
+        })
+
+         //GET API ALL DATA  
+        app.get('/review', async(req, res) => {
+        const cursor = reviewCollection.find({});
+        const items = await cursor.toArray();
+        res.send(items)
+    });
+
+        // order get api 
+        app.get('/orders', async(req, res) => {
+        const cursor = orderCollection.find({});
+        const orders = await cursor.toArray();
+        res.send(orders)
+    })
+
+
+     // delete api 
+     app.delete('/orders/:id', async(req, res) => {
+        const id = req.params.id;
+        const query = {_id:ObjectId(id)};
+        const result = await orderCollection.deleteOne(query)
+        res.json(result)
+
+    })
+
+     //get my orders 
+        app.get('/orders/:email', async (req, res) => {
+        const result = await orderCollection
+        .find({email:req.params.email})
+        .toArray();
+        res.send(result);
+     })
+   
     }
     finally{
         // await client.close()
